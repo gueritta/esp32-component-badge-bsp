@@ -7,8 +7,9 @@
 #include "esp_lcd_types.h"
 #include "freertos/FreeRTOS.h"
 
-esp_err_t __attribute__((weak)) bsp_display_initialize(void) {
-    return ESP_ERR_NOT_SUPPORTED;
+esp_err_t __attribute__((weak)) bsp_display_initialize(const bsp_display_configuration_t* configuration) {
+    (void)configuration;
+    return ESP_OK;
 }
 
 esp_err_t __attribute__((weak)) bsp_display_get_parameters(size_t* h_res, size_t* v_res,

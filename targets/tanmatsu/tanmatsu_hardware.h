@@ -68,3 +68,8 @@
 #define BSP_I2S_BCLK           29
 #define BSP_I2S_WS             31
 #define BSP_I2S_DOUT           28
+
+// LEDs
+#define BSP_LED_NUM 6
+
+#define BSP_LED_COUNT BSP_LED_NUM  // Deprecated, use bsp_led_get_count() instead

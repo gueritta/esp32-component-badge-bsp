@@ -87,7 +87,8 @@ static esp_err_t bsp_display_initialize_flush(void) {
     return esp_lcd_panel_io_register_event_callbacks(display_lcd_panel_io, &callbacks, NULL);
 }
 
-esp_err_t bsp_display_initialize(void) {
+esp_err_t bsp_display_initialize(const bsp_display_configuration_t* configuration) {
+    (void)configuration;
     ESP_RETURN_ON_ERROR(gpio_set_direction(BSP_LCD_MODE_PIN, GPIO_MODE_OUTPUT), TAG,
                         "Could not set the LCD mode pin direction");
 
@@ -99,7 +100,7 @@ esp_err_t bsp_display_initialize(void) {
         .sclk_io_num     = BSP_SPI_SCLK,
         .quadwp_io_num   = -1,
         .quadhd_io_num   = -1,
-        .max_transfer_sz = H_RES * 80 * sizeof(uint16_t),
+        .max_transfer_sz = H_RES * 8 * sizeof(uint16_t),
     };
 
     ESP_RETURN_ON_ERROR(spi_bus_initialize(SPI3_HOST, &spi_bus_config, SPI_DMA_CH_AUTO), TAG,
@@ -110,7 +111,7 @@ esp_err_t bsp_display_initialize(void) {
         .dc_gpio_num       = BSP_LCD_DC_PIN,
         .spi_mode          = 0,
         .pclk_hz           = 40 * 1000 * 1000,
-        .trans_queue_depth = 10,
+        .trans_queue_depth = 4,
         .lcd_cmd_bits      = 8,
         .lcd_param_bits    = 8,
     };

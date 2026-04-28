@@ -2,10 +2,11 @@
 // SPDX-License-Identifier: MIT
 
 #include <stdint.h>
-#include "bh24_hardware.h"
 #include "bsp/led.h"
+#include "driver/gpio.h"
+#include "esp_check.h"
 #include "esp_err.h"
-#include "esp_log.h"
+#include "hackerhotel2024_hardware.h"
 #include "led_strip.h"
 
 static led_strip_handle_t led_strip = NULL;

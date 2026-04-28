@@ -7,7 +7,7 @@
 #include "esp_err.h"
 
 esp_err_t __attribute__((weak)) bsp_audio_initialize(void) {
-    return ESP_ERR_NOT_SUPPORTED;
+    return ESP_OK;
 }
 
 esp_err_t __attribute__((weak)) bsp_audio_set_rate(uint32_t rate) {
@@ -23,6 +23,10 @@ esp_err_t __attribute__((weak)) bsp_audio_set_volume(float percentage) {
 }
 
 esp_err_t __attribute__((weak)) bsp_audio_set_amplifier(bool enable) {
+    return ESP_ERR_NOT_SUPPORTED;
+}
+
+esp_err_t __attribute__((weak)) bsp_audio_set_amplifier_force(bool force) {
     return ESP_ERR_NOT_SUPPORTED;
 }
 

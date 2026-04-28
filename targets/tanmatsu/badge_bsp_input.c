@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include <stdint.h>
 #include <string.h>
+#include "badge_bsp_input_hooks.h"
 #include "bsp/input.h"
 #include "bsp/tanmatsu.h"
 #include "driver/gpio.h"
@@ -30,6 +31,21 @@ static char     key_repeat_utf8[5]   = {0};
 static uint32_t key_repeat_modifiers = 0;
 
 static bool prev_volume_down_state = false;
+
+static tanmatsu_coprocessor_keys_t current_keys = {0};
+
+// Inject an input event into the queue (bypasses hooks)
+esp_err_t bsp_input_inject_event(bsp_input_event_t* event) {
+    if (event == NULL || event_queue == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    if (xQueueSend(event_queue, event, pdMS_TO_TICKS(10)) != pdTRUE) {
+        return ESP_ERR_TIMEOUT;
+    }
+
+    return ESP_OK;
+}
 
 IRAM_ATTR static void volume_down_gpio_interrupt_handler(void* pvParameters) {
     bool state = !gpio_get_level(BSP_GPIO_BTN_VOLUME_DOWN);  // GPIO is active low
@@ -58,7 +74,10 @@ static void send_navigation_event(bsp_input_navigation_key_t key, bool state, ui
         .args_navigation.modifiers = modifiers,
         .args_navigation.state     = state,
     };
-    xQueueSend(event_queue, &event, 0);
+    // Offer to hooks first; if consumed, don't queue
+    if (!bsp_input_hooks_process(&event)) {
+        xQueueSend(event_queue, &event, 0);
+    }
 }
 
 static void send_keyboard_event(char ascii, char const* utf8, uint32_t modifiers) {
@@ -68,7 +87,10 @@ static void send_keyboard_event(char ascii, char const* utf8, uint32_t modifiers
         .args_keyboard.utf8      = utf8,
         .args_keyboard.modifiers = modifiers,
     };
-    xQueueSend(event_queue, &event, 0);
+    // Offer to hooks first; if consumed, don't queue
+    if (!bsp_input_hooks_process(&event)) {
+        xQueueSend(event_queue, &event, 0);
+    }
 }
 
 static void send_action_event(bsp_input_action_type_t action, bool state) {
@@ -77,7 +99,10 @@ static void send_action_event(bsp_input_action_type_t action, bool state) {
         .args_action.type  = action,
         .args_action.state = state,
     };
-    xQueueSend(event_queue, &event, 0);
+    // Offer to hooks first; if consumed, don't queue
+    if (!bsp_input_hooks_process(&event)) {
+        xQueueSend(event_queue, &event, 0);
+    }
 }
 
 static void send_scancode_event(bsp_input_scancode_t scancode, bool state) {
@@ -85,7 +110,10 @@ static void send_scancode_event(bsp_input_scancode_t scancode, bool state) {
         .type                   = INPUT_EVENT_TYPE_SCANCODE,
         .args_scancode.scancode = scancode | (state ? 0 : BSP_INPUT_SCANCODE_RELEASE_MODIFIER),
     };
-    xQueueSend(event_queue, &event, 0);
+    // Offer to hooks first; if consumed, don't queue
+    if (!bsp_input_hooks_process(&event)) {
+        xQueueSend(event_queue, &event, 0);
+    }
 }
 
 static void handle_keyboard_text_entry(bool curr_state, bool prev_state, char ascii, char ascii_shift, char const* utf8,
@@ -122,6 +150,8 @@ void bsp_internal_coprocessor_keyboard_callback(tanmatsu_coprocessor_handle_t ha
                                                 tanmatsu_coprocessor_keys_t*  prev_keys,
                                                 tanmatsu_coprocessor_keys_t*  keys) {
     static bool meta_key_modifier_used = false;
+
+    current_keys = *keys;
 
     // Modifier keys
     uint32_t modifiers = 0;
@@ -432,6 +462,9 @@ esp_err_t bsp_input_initialize(void) {
         ESP_RETURN_ON_FALSE(event_queue, ESP_ERR_NO_MEM, TAG, "Failed to create input event queue");
     }
 
+    // Initialize input hooks system (from common/)
+    bsp_input_hooks_init();
+
     /*if (key_repeat_thread_handle == NULL) {
         xTaskCreate(key_repeat_thread, "Key repeat thread", 4096, NULL, tskIDLE_PRIORITY, &key_repeat_thread_handle);
         ESP_RETURN_ON_FALSE(key_repeat_thread_handle, ESP_ERR_NO_MEM, TAG, "Failed to create key repeat task");
@@ -447,6 +480,11 @@ esp_err_t bsp_input_initialize(void) {
     ESP_RETURN_ON_ERROR(gpio_config(&int_pin_cfg), TAG, "Failed to configure volume down button GPIO");
     ESP_RETURN_ON_ERROR(gpio_isr_handler_add(BSP_GPIO_BTN_VOLUME_DOWN, volume_down_gpio_interrupt_handler, NULL), TAG,
                         "Failed to add interrupt handler for volume down button GPIO");
+
+    tanmatsu_coprocessor_handle_t handle = NULL;
+    ESP_RETURN_ON_ERROR(bsp_tanmatsu_coprocessor_get_handle(&handle), TAG, "Failed to get coprocessor handle");
+    ESP_RETURN_ON_ERROR(tanmatsu_coprocessor_get_keyboard_keys(handle, &current_keys), TAG,
+                        "Failed to read keyboard keys");
 
     return ESP_OK;
 }
@@ -485,69 +523,67 @@ esp_err_t bsp_input_set_backlight_brightness(uint8_t percentage) {
 }
 
 esp_err_t bsp_input_read_navigation_key(bsp_input_navigation_key_t key, bool* out_state) {
-    tanmatsu_coprocessor_handle_t handle = NULL;
-    ESP_RETURN_ON_ERROR(bsp_tanmatsu_coprocessor_get_handle(&handle), TAG, "Failed to get coprocessor handle");
-    tanmatsu_coprocessor_keys_t keys;
-    if (key != BSP_GPIO_BTN_VOLUME_DOWN) {
-        ESP_RETURN_ON_ERROR(tanmatsu_coprocessor_get_keyboard_keys(handle, &keys), TAG, "Failed to read keyboard keys");
+    if (out_state == NULL) {
+        return ESP_ERR_INVALID_ARG;
     }
+
     switch (key) {
         case BSP_INPUT_NAVIGATION_KEY_ESC:
-            *out_state = keys.key_esc;
+            *out_state = current_keys.key_esc;
             break;
         case BSP_INPUT_NAVIGATION_KEY_LEFT:
-            *out_state = keys.key_left;
+            *out_state = current_keys.key_left;
             break;
         case BSP_INPUT_NAVIGATION_KEY_RIGHT:
-            *out_state = keys.key_right;
+            *out_state = current_keys.key_right;
             break;
         case BSP_INPUT_NAVIGATION_KEY_UP:
-            *out_state = keys.key_up;
+            *out_state = current_keys.key_up;
             break;
         case BSP_INPUT_NAVIGATION_KEY_DOWN:
-            *out_state = keys.key_down;
+            *out_state = current_keys.key_down;
             break;
         case BSP_INPUT_NAVIGATION_KEY_RETURN:
-            *out_state = keys.key_return;
+            *out_state = current_keys.key_return;
             break;
         case BSP_INPUT_NAVIGATION_KEY_SUPER:
-            *out_state = keys.key_meta;
+            *out_state = current_keys.key_meta;
             break;
         case BSP_INPUT_NAVIGATION_KEY_TAB:
-            *out_state = keys.key_tab;
+            *out_state = current_keys.key_tab;
             break;
         case BSP_INPUT_NAVIGATION_KEY_BACKSPACE:
-            *out_state = keys.key_backspace;
+            *out_state = current_keys.key_backspace;
             break;
         case BSP_INPUT_NAVIGATION_KEY_SPACE_L:
-            *out_state = keys.key_space_l;
+            *out_state = current_keys.key_space_l;
             break;
         case BSP_INPUT_NAVIGATION_KEY_SPACE_M:
-            *out_state = keys.key_space_m;
+            *out_state = current_keys.key_space_m;
             break;
         case BSP_INPUT_NAVIGATION_KEY_SPACE_R:
-            *out_state = keys.key_space_r;
+            *out_state = current_keys.key_space_r;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F1:
-            *out_state = keys.key_f1;
+            *out_state = current_keys.key_f1;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F2:
-            *out_state = keys.key_f2;
+            *out_state = current_keys.key_f2;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F3:
-            *out_state = keys.key_f3;
+            *out_state = current_keys.key_f3;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F4:
-            *out_state = keys.key_f4;
+            *out_state = current_keys.key_f4;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F5:
-            *out_state = keys.key_f5;
+            *out_state = current_keys.key_f5;
             break;
         case BSP_INPUT_NAVIGATION_KEY_F6:
-            *out_state = keys.key_f6;
+            *out_state = current_keys.key_f6;
             break;
         case BSP_INPUT_NAVIGATION_KEY_VOLUME_UP:
-            *out_state = keys.key_volume_up;
+            *out_state = current_keys.key_volume_up;
             break;
         case BSP_INPUT_NAVIGATION_KEY_VOLUME_DOWN:
             *out_state = !gpio_get_level(BSP_GPIO_BTN_VOLUME_DOWN);
@@ -559,11 +595,243 @@ esp_err_t bsp_input_read_navigation_key(bsp_input_navigation_key_t key, bool* ou
     return ESP_OK;
 }
 
+esp_err_t bsp_input_read_scancode(bsp_input_scancode_t key, bool* out_state) {
+    if (out_state == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    switch (key) {
+        case BSP_INPUT_SCANCODE_ESC:
+            *out_state = current_keys.key_esc;
+            break;
+        case BSP_INPUT_SCANCODE_F1:
+            *out_state = current_keys.key_f1;
+            break;
+        case BSP_INPUT_SCANCODE_F2:
+            *out_state = current_keys.key_f2;
+            break;
+        case BSP_INPUT_SCANCODE_F3:
+            *out_state = current_keys.key_f3;
+            break;
+        case BSP_INPUT_SCANCODE_F4:
+            *out_state = current_keys.key_f4;
+            break;
+        case BSP_INPUT_SCANCODE_F5:
+            *out_state = current_keys.key_f5;
+            break;
+        case BSP_INPUT_SCANCODE_F6:
+            *out_state = current_keys.key_f6;
+            break;
+        case BSP_INPUT_SCANCODE_BACKSPACE:
+            *out_state = current_keys.key_backspace;
+            break;
+        case BSP_INPUT_SCANCODE_GRAVE:
+            *out_state = current_keys.key_tilde;
+            break;
+        case BSP_INPUT_SCANCODE_1:
+            *out_state = current_keys.key_1;
+            break;
+        case BSP_INPUT_SCANCODE_2:
+            *out_state = current_keys.key_2;
+            break;
+        case BSP_INPUT_SCANCODE_3:
+            *out_state = current_keys.key_3;
+            break;
+        case BSP_INPUT_SCANCODE_4:
+            *out_state = current_keys.key_4;
+            break;
+        case BSP_INPUT_SCANCODE_5:
+            *out_state = current_keys.key_5;
+            break;
+        case BSP_INPUT_SCANCODE_6:
+            *out_state = current_keys.key_6;
+            break;
+        case BSP_INPUT_SCANCODE_7:
+            *out_state = current_keys.key_7;
+            break;
+        case BSP_INPUT_SCANCODE_8:
+            *out_state = current_keys.key_8;
+            break;
+        case BSP_INPUT_SCANCODE_9:
+            *out_state = current_keys.key_9;
+            break;
+        case BSP_INPUT_SCANCODE_0:
+            *out_state = current_keys.key_0;
+            break;
+        case BSP_INPUT_SCANCODE_MINUS:
+            *out_state = current_keys.key_minus;
+            break;
+        case BSP_INPUT_SCANCODE_EQUAL:
+            *out_state = current_keys.key_equals;
+            break;
+        case BSP_INPUT_SCANCODE_TAB:
+            *out_state = current_keys.key_tab;
+            break;
+        case BSP_INPUT_SCANCODE_Q:
+            *out_state = current_keys.key_q;
+            break;
+        case BSP_INPUT_SCANCODE_W:
+            *out_state = current_keys.key_w;
+            break;
+        case BSP_INPUT_SCANCODE_E:
+            *out_state = current_keys.key_e;
+            break;
+        case BSP_INPUT_SCANCODE_R:
+            *out_state = current_keys.key_r;
+            break;
+        case BSP_INPUT_SCANCODE_T:
+            *out_state = current_keys.key_t;
+            break;
+        case BSP_INPUT_SCANCODE_Y:
+            *out_state = current_keys.key_y;
+            break;
+        case BSP_INPUT_SCANCODE_U:
+            *out_state = current_keys.key_u;
+            break;
+        case BSP_INPUT_SCANCODE_I:
+            *out_state = current_keys.key_i;
+            break;
+        case BSP_INPUT_SCANCODE_O:
+            *out_state = current_keys.key_o;
+            break;
+        case BSP_INPUT_SCANCODE_P:
+            *out_state = current_keys.key_p;
+            break;
+        case BSP_INPUT_SCANCODE_LEFTBRACE:
+            *out_state = current_keys.key_sqbracket_open;
+            break;
+        case BSP_INPUT_SCANCODE_RIGHTBRACE:
+            *out_state = current_keys.key_sqbracket_close;
+            break;
+        case BSP_INPUT_SCANCODE_FN:
+            *out_state = current_keys.key_fn;
+            break;
+        case BSP_INPUT_SCANCODE_A:
+            *out_state = current_keys.key_a;
+            break;
+        case BSP_INPUT_SCANCODE_S:
+            *out_state = current_keys.key_s;
+            break;
+        case BSP_INPUT_SCANCODE_D:
+            *out_state = current_keys.key_d;
+            break;
+        case BSP_INPUT_SCANCODE_F:
+            *out_state = current_keys.key_f;
+            break;
+        case BSP_INPUT_SCANCODE_G:
+            *out_state = current_keys.key_g;
+            break;
+        case BSP_INPUT_SCANCODE_H:
+            *out_state = current_keys.key_h;
+            break;
+        case BSP_INPUT_SCANCODE_J:
+            *out_state = current_keys.key_j;
+            break;
+        case BSP_INPUT_SCANCODE_K:
+            *out_state = current_keys.key_k;
+            break;
+        case BSP_INPUT_SCANCODE_L:
+            *out_state = current_keys.key_l;
+            break;
+        case BSP_INPUT_SCANCODE_SEMICOLON:
+            *out_state = current_keys.key_semicolon;
+            break;
+        case BSP_INPUT_SCANCODE_APOSTROPHE:
+            *out_state = current_keys.key_quote;
+            break;
+        case BSP_INPUT_SCANCODE_ENTER:
+            *out_state = current_keys.key_return;
+            break;
+        case BSP_INPUT_SCANCODE_LEFTSHIFT:
+            *out_state = current_keys.key_shift_l;
+            break;
+        case BSP_INPUT_SCANCODE_Z:
+            *out_state = current_keys.key_z;
+            break;
+        case BSP_INPUT_SCANCODE_X:
+            *out_state = current_keys.key_x;
+            break;
+        case BSP_INPUT_SCANCODE_C:
+            *out_state = current_keys.key_c;
+            break;
+        case BSP_INPUT_SCANCODE_V:
+            *out_state = current_keys.key_v;
+            break;
+        case BSP_INPUT_SCANCODE_B:
+            *out_state = current_keys.key_b;
+            break;
+        case BSP_INPUT_SCANCODE_N:
+            *out_state = current_keys.key_n;
+            break;
+        case BSP_INPUT_SCANCODE_M:
+            *out_state = current_keys.key_m;
+            break;
+        case BSP_INPUT_SCANCODE_COMMA:
+            *out_state = current_keys.key_comma;
+            break;
+        case BSP_INPUT_SCANCODE_DOT:
+            *out_state = current_keys.key_dot;
+            break;
+        case BSP_INPUT_SCANCODE_SLASH:
+            *out_state = current_keys.key_slash;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_GREY_UP:
+            *out_state = current_keys.key_up;
+            break;
+        case BSP_INPUT_SCANCODE_RIGHTSHIFT:
+            *out_state = current_keys.key_shift_r;
+            break;
+        case BSP_INPUT_SCANCODE_LEFTCTRL:
+            *out_state = current_keys.key_ctrl;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_LEFTMETA:
+            *out_state = current_keys.key_meta;
+            break;
+        case BSP_INPUT_SCANCODE_LEFTALT:
+            *out_state = current_keys.key_alt_l;
+            break;
+        case BSP_INPUT_SCANCODE_BACKSLASH:
+            *out_state = current_keys.key_backslash;
+            break;
+        case BSP_INPUT_SCANCODE_SPACE:
+            *out_state = current_keys.key_space_l | current_keys.key_space_m | current_keys.key_space_r;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_RALT:
+            *out_state = current_keys.key_alt_r;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_GREY_LEFT:
+            *out_state = current_keys.key_left;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_GREY_DOWN:
+            *out_state = current_keys.key_down;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_GREY_RIGHT:
+            *out_state = current_keys.key_right;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_VOLUME_UP:
+            *out_state = current_keys.key_volume_up;
+            break;
+        case BSP_INPUT_SCANCODE_ESCAPED_VOLUME_DOWN:
+            *out_state = !gpio_get_level(BSP_GPIO_BTN_VOLUME_DOWN);
+            break;
+        default:
+            *out_state = false;
+            break;
+    }
+
+    return ESP_OK;
+}
+
 esp_err_t bsp_input_read_action(bsp_input_action_type_t action, bool* out_state) {
+    if (out_state == NULL) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
     tanmatsu_coprocessor_handle_t handle = NULL;
     ESP_RETURN_ON_ERROR(bsp_tanmatsu_coprocessor_get_handle(&handle), TAG, "Failed to get coprocessor handle");
     tanmatsu_coprocessor_inputs_t inputs;
     ESP_RETURN_ON_ERROR(tanmatsu_coprocessor_get_inputs(handle, &inputs), TAG, "Failed to read inputs");
+
     switch (action) {
         case BSP_INPUT_ACTION_TYPE_POWER_BUTTON:
             *out_state = inputs.power_button;

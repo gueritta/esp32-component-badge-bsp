@@ -15,14 +15,15 @@ static char const TAG[] = "BSP: device";
 // Internal BSP functions to initialize the subsystems
 esp_err_t bsp_device_initialize_custom(void);
 esp_err_t bsp_audio_initialize(void);
-esp_err_t bsp_display_initialize(void);
+esp_err_t bsp_display_initialize(const bsp_display_configuration_t* configuration);
 esp_err_t bsp_i2c_primary_bus_initialize(void);
 esp_err_t bsp_input_initialize(void);
 esp_err_t bsp_led_initialize(void);
 esp_err_t bsp_power_initialize(void);
 esp_err_t bsp_rtc_initialize(void);
+esp_err_t bsp_orientation_initialize(void);
 
-esp_err_t bsp_device_initialize(void) {
+esp_err_t bsp_device_initialize(const bsp_configuration_t* configuration) {
     // Install the ISR service for GPIO interrupts
     gpio_install_isr_service(0);
 
@@ -30,18 +31,18 @@ esp_err_t bsp_device_initialize(void) {
     ESP_LOGI(TAG, "Initializing primary I2C bus...");
     BSP_RETURN_ON_FAILURE(bsp_i2c_primary_bus_initialize(), ESP_LOGE(TAG, "Failed to initialize primary I2C bus"));
 
-    // Initialize the display
-    ESP_LOGI(TAG, "Initializing display...");
-    BSP_RETURN_ON_FAILURE(bsp_display_initialize(), ESP_LOGE(TAG, "Failed to initialize display"));
-
-    // Initialize the input framework
-    ESP_LOGI(TAG, "Initializing input framework...");
-    BSP_RETURN_ON_FAILURE(bsp_input_initialize(), ESP_LOGE(TAG, "Failed to initialize input framework"));
 
     // Initialize device specific hardware
     ESP_LOGI(TAG, "Initializing device specific hardware...");
     BSP_RETURN_ON_FAILURE(bsp_device_initialize_custom(),
                           ESP_LOGE(TAG, "Failed to initialize device specific hardware"));
+
+    // Initialize the display
+    BSP_RETURN_ON_FAILURE(bsp_display_initialize(configuration != NULL ? &configuration->display : NULL),
+                          ESP_LOGE(TAG, "Failed to initialize display"));
+
+    // Initialize the input framework
+    BSP_RETURN_ON_FAILURE(bsp_input_initialize(), ESP_LOGE(TAG, "Failed to initialize input framework"));
 
     // Initialize power
     BSP_RETURN_ON_FAILURE(bsp_power_initialize(), ESP_LOGE(TAG, "Failed to initialize power subsystem"));
@@ -54,6 +55,9 @@ esp_err_t bsp_device_initialize(void) {
 
     // Initialize LEDs
     BSP_RETURN_ON_FAILURE(bsp_led_initialize(), ESP_LOGE(TAG, "Failed to initialize LED subsystem"));
+
+    // Initialize orientation sensor
+    BSP_RETURN_ON_FAILURE(bsp_orientation_initialize(), ESP_LOGE(TAG, "Failed to initialize orientation sensor"));
 
     return ESP_OK;
 }
