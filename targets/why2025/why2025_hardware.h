@@ -16,3 +16,7 @@
 #define BSP_DSI_LDO_CHAN       3
 #define BSP_DSI_LDO_VOLTAGE_MV 2500
 #define BSP_LCD_RESET_PIN      17  // Note: low for normal operation, high for reset
+
+// TCA8418 keyboard scanner
+#define BSP_TCA8418_I2C_ADDRESS 0x34
+#define BSP_TCA8418_INT_PIN     GPIO_NUM_NC  // Interrupt pin not connected

@@ -28,9 +28,12 @@ esp_err_t bsp_device_initialize(const bsp_configuration_t* configuration) {
     gpio_install_isr_service(0);
 
     // Initialize the primary I2C bus
+    ESP_LOGI(TAG, "Initializing primary I2C bus...");
     BSP_RETURN_ON_FAILURE(bsp_i2c_primary_bus_initialize(), ESP_LOGE(TAG, "Failed to initialize primary I2C bus"));
 
+
     // Initialize device specific hardware
+    ESP_LOGI(TAG, "Initializing device specific hardware...");
     BSP_RETURN_ON_FAILURE(bsp_device_initialize_custom(),
                           ESP_LOGE(TAG, "Failed to initialize device specific hardware"));
 
