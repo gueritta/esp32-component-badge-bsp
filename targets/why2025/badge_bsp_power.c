@@ -94,8 +94,8 @@ esp_err_t bsp_power_get_battery_information(bsp_power_battery_information_t* out
     out_information->charging_disabled        = false;
     out_information->battery_charging         = charging && !charge_full;
     out_information->maximum_charging_current = IP5306_MAX_CHARGING_CURRENT_MA;
-    out_information->current_charging_current = 0;
-    out_information->voltage                  = 0;
+    out_information->current_charging_current = 0;  // Not readable from IP5306
+    out_information->voltage                  = 0;  // Not readable from IP5306
     out_information->charging_target_voltage  = 4200;
     out_information->remaining_percentage     = remaining_percentage;
     return ESP_OK;
