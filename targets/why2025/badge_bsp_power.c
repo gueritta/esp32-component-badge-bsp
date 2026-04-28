@@ -15,10 +15,12 @@ static char const* TAG = "BSP: power";
 
 static i2c_master_dev_handle_t ip5306_handle = NULL;
 
-#define IP5306_REG_SYS_CTL0 0x00
-#define IP5306_REG_READ0    0x70
-#define IP5306_REG_READ1    0x71
-#define IP5306_REG_READ4    0x78
+#define IP5306_REG_SYS_CTL0            0x00
+#define IP5306_REG_READ0               0x70
+#define IP5306_REG_READ1               0x71
+#define IP5306_REG_READ4               0x78
+#define IP5306_SYS_CTL0_BOOT_CONFIG    0x37
+#define IP5306_MAX_CHARGING_CURRENT_MA 2100
 
 static esp_err_t ip5306_read_reg(uint8_t reg, uint8_t* out_val) {
     ESP_RETURN_ON_FALSE(ip5306_handle != NULL, ESP_ERR_INVALID_STATE, TAG, "IP5306 handle not initialized");
@@ -48,7 +50,9 @@ esp_err_t bsp_power_initialize(void) {
     ESP_RETURN_ON_ERROR(i2c_master_bus_add_device(i2c_bus_handle_internal, &ip5306_config, &ip5306_handle), TAG,
                         "Failed to add IP5306 I2C device");
 
-    ESP_RETURN_ON_ERROR(ip5306_write_reg(IP5306_REG_SYS_CTL0, 0x37), TAG, "Failed to configure IP5306");
+    // button shutdown enable | boost output normally open | auto power-on | charger enable | boost enable
+    ESP_RETURN_ON_ERROR(ip5306_write_reg(IP5306_REG_SYS_CTL0, IP5306_SYS_CTL0_BOOT_CONFIG), TAG,
+                        "Failed to configure IP5306");
     return ESP_OK;
 }
 
@@ -89,7 +93,7 @@ esp_err_t bsp_power_get_battery_information(bsp_power_battery_information_t* out
     out_information->battery_available        = true;
     out_information->charging_disabled        = false;
     out_information->battery_charging         = charging && !charge_full;
-    out_information->maximum_charging_current = 2100;
+    out_information->maximum_charging_current = IP5306_MAX_CHARGING_CURRENT_MA;
     out_information->current_charging_current = 0;
     out_information->voltage                  = 0;
     out_information->charging_target_voltage  = 4200;
