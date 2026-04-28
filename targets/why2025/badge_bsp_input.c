@@ -44,12 +44,12 @@ static char const* TAG = "BSP INPUT";
 // Index 0 corresponds to TCA8418 scancode 0x01
 static bsp_input_scancode_t const tca8418_keymap[80] = {
     BSP_INPUT_SCANCODE_ESC,        // 0x01
-    BSP_INPUT_SCANCODE_GRAVE,      // 0x02 (SQUARE)
-    BSP_INPUT_SCANCODE_NONE,       // 0x03 (TRIANGLE)
-    BSP_INPUT_SCANCODE_NONE,       // 0x04 (CROSS)
-    BSP_INPUT_SCANCODE_NONE,       // 0x05 (CIRCLE)
-    BSP_INPUT_SCANCODE_NONE,       // 0x06 (CLOUD)
-    BSP_INPUT_SCANCODE_NONE,       // 0x07 (DIAMOND)
+    BSP_INPUT_SCANCODE_NONE,       // 0x02 (SQUARE - WHY2025 specific key, no PC equivalent)
+    BSP_INPUT_SCANCODE_NONE,       // 0x03 (TRIANGLE - WHY2025 specific key)
+    BSP_INPUT_SCANCODE_NONE,       // 0x04 (CROSS - WHY2025 specific key)
+    BSP_INPUT_SCANCODE_NONE,       // 0x05 (CIRCLE - WHY2025 specific key)
+    BSP_INPUT_SCANCODE_NONE,       // 0x06 (CLOUD - WHY2025 specific key)
+    BSP_INPUT_SCANCODE_NONE,       // 0x07 (DIAMOND - WHY2025 specific key)
     BSP_INPUT_SCANCODE_BACKSPACE,  // 0x08
     BSP_INPUT_SCANCODE_0,          // 0x09
     BSP_INPUT_SCANCODE_MINUS,      // 0x0a
@@ -111,9 +111,9 @@ static bsp_input_scancode_t const tca8418_keymap[80] = {
     BSP_INPUT_SCANCODE_LEFTALT,    // 0x3f
 
     BSP_INPUT_SCANCODE_BACKSLASH,  // 0x40
-    BSP_INPUT_SCANCODE_SPACE,      // 0x41
-    BSP_INPUT_SCANCODE_SPACE,      // 0x42
-    BSP_INPUT_SCANCODE_SPACE,      // 0x43
+    BSP_INPUT_SCANCODE_SPACE,      // 0x41 (space bar left section)
+    BSP_INPUT_SCANCODE_SPACE,      // 0x42 (space bar middle section)
+    BSP_INPUT_SCANCODE_SPACE,      // 0x43 (space bar right section)
     BSP_INPUT_SCANCODE_ESCAPED_RALT,       // 0x44
     BSP_INPUT_SCANCODE_P,          // 0x45
     BSP_INPUT_SCANCODE_LEFTBRACE,  // 0x46
@@ -327,9 +327,9 @@ esp_err_t bsp_input_initialize(void) {
     ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS3, 0x00), TAG,
                         "Failed to configure debounce 3");
 
-    // Flush any pending events from the FIFO
+    // Flush any pending events from the FIFO (up to 16 events max per TCA8418 FIFO depth)
     uint8_t discard = 0;
-    while (true) {
+    for (int flush_attempts = 0; flush_attempts < 16; flush_attempts++) {
         uint8_t key = 0;
         if (tca8418_read_register(TCA8418_REG_KEY_EVENT_A, &key) != ESP_OK || key == 0) {
             break;
