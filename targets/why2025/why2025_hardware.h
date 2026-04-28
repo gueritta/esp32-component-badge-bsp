@@ -1,4 +1,3 @@
-
 // SPDX-License-Identifier: MIT
 
 // Private include file, not intended to be included by end users
@@ -9,6 +8,9 @@
 #define BSP_I2C_BUS     0
 #define BSP_I2C_SDA_PIN 18
 #define BSP_I2C_SCL_PIN 20
+
+// IP5306 power management IC
+#define BSP_IP5306_I2C_ADDRESS 0x75
 
 // MIPI DSI display
 #define BSP_DSI_LDO_CHAN       3
