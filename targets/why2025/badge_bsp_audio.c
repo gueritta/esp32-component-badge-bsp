@@ -7,8 +7,6 @@
 #include "driver/i2s_types.h"
 #include "esp_err.h"
 
-static char const* TAG = "BSP: audio";
-
 esp_err_t bsp_audio_initialize(void) {
     return ESP_OK;
 }
