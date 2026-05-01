@@ -21,24 +21,24 @@
 static char const* TAG = "BSP INPUT";
 
 // TCA8418 register addresses
-#define TCA8418_REG_INTERRUPT_STATUS  0x02
+#define TCA8418_REG_INTERRUPT_STATUS   0x02
 #define TCA8418_REG_KEY_LOCK_EVT_COUNT 0x03
-#define TCA8418_REG_KEY_EVENT_A       0x04
-#define TCA8418_REG_GPIO_INT_EN1      0x1A
-#define TCA8418_REG_GPIO_INT_EN2      0x1B
-#define TCA8418_REG_GPIO_INT_EN3      0x1C
-#define TCA8418_REG_GPI_EM1           0x20
-#define TCA8418_REG_GPI_EM2           0x21
-#define TCA8418_REG_GPI_EM3           0x22
-#define TCA8418_REG_GPIO_DIRECTION_1  0x23
-#define TCA8418_REG_GPIO_DIRECTION_2  0x24
-#define TCA8418_REG_GPIO_DIRECTION_3  0x25
-#define TCA8418_REG_GPIO_INT_STAT1    0x11
-#define TCA8418_REG_GPIO_INT_STAT2    0x12
-#define TCA8418_REG_GPIO_INT_STAT3    0x13
-#define TCA8418_REG_DEBOUNCE_DIS1     0x29
-#define TCA8418_REG_DEBOUNCE_DIS2     0x2A
-#define TCA8418_REG_DEBOUNCE_DIS3     0x2B
+#define TCA8418_REG_KEY_EVENT_A        0x04
+#define TCA8418_REG_GPIO_INT_EN1       0x1A
+#define TCA8418_REG_GPIO_INT_EN2       0x1B
+#define TCA8418_REG_GPIO_INT_EN3       0x1C
+#define TCA8418_REG_GPI_EM1            0x20
+#define TCA8418_REG_GPI_EM2            0x21
+#define TCA8418_REG_GPI_EM3            0x22
+#define TCA8418_REG_GPIO_DIRECTION_1   0x23
+#define TCA8418_REG_GPIO_DIRECTION_2   0x24
+#define TCA8418_REG_GPIO_DIRECTION_3   0x25
+#define TCA8418_REG_GPIO_INT_STAT1     0x11
+#define TCA8418_REG_GPIO_INT_STAT2     0x12
+#define TCA8418_REG_GPIO_INT_STAT3     0x13
+#define TCA8418_REG_DEBOUNCE_DIS1      0x29
+#define TCA8418_REG_DEBOUNCE_DIS2      0x2A
+#define TCA8418_REG_DEBOUNCE_DIS3      0x2B
 
 // WHY2025 keymap: TCA8418 scancodes 0x01-0x50 -> BSP scancodes
 // Index 0 corresponds to TCA8418 scancode 0x01
@@ -59,22 +59,22 @@ static bsp_input_scancode_t const tca8418_keymap[80] = {
     BSP_INPUT_SCANCODE_3,          // 0x0e
     BSP_INPUT_SCANCODE_4,          // 0x0f
 
-    BSP_INPUT_SCANCODE_5,          // 0x10
-    BSP_INPUT_SCANCODE_6,          // 0x11
-    BSP_INPUT_SCANCODE_7,          // 0x12
-    BSP_INPUT_SCANCODE_8,          // 0x13
-    BSP_INPUT_SCANCODE_9,          // 0x14
-    BSP_INPUT_SCANCODE_TAB,        // 0x15
-    BSP_INPUT_SCANCODE_Q,          // 0x16
-    BSP_INPUT_SCANCODE_W,          // 0x17
-    BSP_INPUT_SCANCODE_E,          // 0x18
-    BSP_INPUT_SCANCODE_R,          // 0x19
-    BSP_INPUT_SCANCODE_T,          // 0x1a
-    BSP_INPUT_SCANCODE_Y,          // 0x1b
-    BSP_INPUT_SCANCODE_U,          // 0x1c
-    BSP_INPUT_SCANCODE_I,          // 0x1d
-    BSP_INPUT_SCANCODE_O,          // 0x1e
-    BSP_INPUT_SCANCODE_FN,         // 0x1f
+    BSP_INPUT_SCANCODE_5,    // 0x10
+    BSP_INPUT_SCANCODE_6,    // 0x11
+    BSP_INPUT_SCANCODE_7,    // 0x12
+    BSP_INPUT_SCANCODE_8,    // 0x13
+    BSP_INPUT_SCANCODE_9,    // 0x14
+    BSP_INPUT_SCANCODE_TAB,  // 0x15
+    BSP_INPUT_SCANCODE_Q,    // 0x16
+    BSP_INPUT_SCANCODE_W,    // 0x17
+    BSP_INPUT_SCANCODE_E,    // 0x18
+    BSP_INPUT_SCANCODE_R,    // 0x19
+    BSP_INPUT_SCANCODE_T,    // 0x1a
+    BSP_INPUT_SCANCODE_Y,    // 0x1b
+    BSP_INPUT_SCANCODE_U,    // 0x1c
+    BSP_INPUT_SCANCODE_I,    // 0x1d
+    BSP_INPUT_SCANCODE_O,    // 0x1e
+    BSP_INPUT_SCANCODE_FN,   // 0x1f
 
     BSP_INPUT_SCANCODE_A,          // 0x20
     BSP_INPUT_SCANCODE_S,          // 0x21
@@ -93,46 +93,46 @@ static bsp_input_scancode_t const tca8418_keymap[80] = {
     BSP_INPUT_SCANCODE_B,          // 0x2e
     BSP_INPUT_SCANCODE_N,          // 0x2f
 
-    BSP_INPUT_SCANCODE_M,          // 0x30
-    BSP_INPUT_SCANCODE_COMMA,      // 0x31
-    BSP_INPUT_SCANCODE_DOT,        // 0x32
-    BSP_INPUT_SCANCODE_ESCAPED_GREY_LEFT,  // 0x33
-    BSP_INPUT_SCANCODE_ESCAPED_GREY_DOWN,  // 0x34
-    BSP_INPUT_SCANCODE_ESCAPED_GREY_RIGHT, // 0x35
-    BSP_INPUT_SCANCODE_SLASH,      // 0x36
-    BSP_INPUT_SCANCODE_ESCAPED_GREY_UP,    // 0x37
-    BSP_INPUT_SCANCODE_RIGHTSHIFT, // 0x38
-    BSP_INPUT_SCANCODE_SEMICOLON,  // 0x39
-    BSP_INPUT_SCANCODE_APOSTROPHE, // 0x3a
-    BSP_INPUT_SCANCODE_ENTER,      // 0x3b
-    BSP_INPUT_SCANCODE_EQUAL,      // 0x3c
-    BSP_INPUT_SCANCODE_LEFTCTRL,   // 0x3d
-    BSP_INPUT_SCANCODE_ESCAPED_LEFTMETA,   // 0x3e (LGUI)
-    BSP_INPUT_SCANCODE_LEFTALT,    // 0x3f
+    BSP_INPUT_SCANCODE_M,                   // 0x30
+    BSP_INPUT_SCANCODE_COMMA,               // 0x31
+    BSP_INPUT_SCANCODE_DOT,                 // 0x32
+    BSP_INPUT_SCANCODE_ESCAPED_GREY_LEFT,   // 0x33
+    BSP_INPUT_SCANCODE_ESCAPED_GREY_DOWN,   // 0x34
+    BSP_INPUT_SCANCODE_ESCAPED_GREY_RIGHT,  // 0x35
+    BSP_INPUT_SCANCODE_SLASH,               // 0x36
+    BSP_INPUT_SCANCODE_ESCAPED_GREY_UP,     // 0x37
+    BSP_INPUT_SCANCODE_RIGHTSHIFT,          // 0x38
+    BSP_INPUT_SCANCODE_SEMICOLON,           // 0x39
+    BSP_INPUT_SCANCODE_APOSTROPHE,          // 0x3a
+    BSP_INPUT_SCANCODE_ENTER,               // 0x3b
+    BSP_INPUT_SCANCODE_EQUAL,               // 0x3c
+    BSP_INPUT_SCANCODE_LEFTCTRL,            // 0x3d
+    BSP_INPUT_SCANCODE_ESCAPED_LEFTMETA,    // 0x3e (LGUI)
+    BSP_INPUT_SCANCODE_LEFTALT,             // 0x3f
 
-    BSP_INPUT_SCANCODE_BACKSLASH,  // 0x40
-    BSP_INPUT_SCANCODE_SPACE,      // 0x41 (space bar left section)
-    BSP_INPUT_SCANCODE_SPACE,      // 0x42 (space bar middle section)
-    BSP_INPUT_SCANCODE_SPACE,      // 0x43 (space bar right section)
-    BSP_INPUT_SCANCODE_ESCAPED_RALT,       // 0x44
-    BSP_INPUT_SCANCODE_P,          // 0x45
-    BSP_INPUT_SCANCODE_LEFTBRACE,  // 0x46
-    BSP_INPUT_SCANCODE_NONE,       // 0x47
-    BSP_INPUT_SCANCODE_NONE,       // 0x48
-    BSP_INPUT_SCANCODE_NONE,       // 0x49
-    BSP_INPUT_SCANCODE_NONE,       // 0x4a
-    BSP_INPUT_SCANCODE_NONE,       // 0x4b
-    BSP_INPUT_SCANCODE_NONE,       // 0x4c
-    BSP_INPUT_SCANCODE_NONE,       // 0x4d
-    BSP_INPUT_SCANCODE_NONE,       // 0x4e
-    BSP_INPUT_SCANCODE_NONE,       // 0x4f
+    BSP_INPUT_SCANCODE_BACKSLASH,     // 0x40
+    BSP_INPUT_SCANCODE_SPACE,         // 0x41 (space bar left section)
+    BSP_INPUT_SCANCODE_SPACE,         // 0x42 (space bar middle section)
+    BSP_INPUT_SCANCODE_SPACE,         // 0x43 (space bar right section)
+    BSP_INPUT_SCANCODE_ESCAPED_RALT,  // 0x44
+    BSP_INPUT_SCANCODE_P,             // 0x45
+    BSP_INPUT_SCANCODE_LEFTBRACE,     // 0x46
+    BSP_INPUT_SCANCODE_NONE,          // 0x47
+    BSP_INPUT_SCANCODE_NONE,          // 0x48
+    BSP_INPUT_SCANCODE_NONE,          // 0x49
+    BSP_INPUT_SCANCODE_NONE,          // 0x4a
+    BSP_INPUT_SCANCODE_NONE,          // 0x4b
+    BSP_INPUT_SCANCODE_NONE,          // 0x4c
+    BSP_INPUT_SCANCODE_NONE,          // 0x4d
+    BSP_INPUT_SCANCODE_NONE,          // 0x4e
+    BSP_INPUT_SCANCODE_NONE,          // 0x4f
 
-    BSP_INPUT_SCANCODE_RIGHTBRACE, // 0x50
+    BSP_INPUT_SCANCODE_RIGHTBRACE,  // 0x50
 };
 
-static QueueHandle_t            event_queue   = NULL;
-static i2c_master_dev_handle_t  tca8418_dev   = NULL;
-static uint32_t                 modifiers     = 0;
+static QueueHandle_t           event_queue = NULL;
+static i2c_master_dev_handle_t tca8418_dev = NULL;
+static uint32_t                modifiers   = 0;
 
 // Inject an input event into the queue (bypasses hooks)
 esp_err_t bsp_input_inject_event(bsp_input_event_t* event) {
@@ -192,8 +192,8 @@ static void tca8418_poll_task(void* pvParameters) {
                 break;
             }
 
-            bool    pressed  = (raw >> 7) & 0x01;
-            uint8_t keycode  = raw & 0x7F;
+            bool    pressed = (raw >> 7) & 0x01;
+            uint8_t keycode = raw & 0x7F;
 
             if (keycode == 0 || keycode > 0x50) {
                 ESP_LOGD(TAG, "Scancode out of range: 0x%02x, skipping", keycode);
@@ -205,32 +205,46 @@ static void tca8418_poll_task(void* pvParameters) {
             // Update modifier bitmask
             switch (scancode) {
                 case BSP_INPUT_SCANCODE_LEFTSHIFT:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_SHIFT_L;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_SHIFT_L;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_SHIFT_L;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_SHIFT_L;
                     break;
                 case BSP_INPUT_SCANCODE_RIGHTSHIFT:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_SHIFT_R;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_SHIFT_R;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_SHIFT_R;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_SHIFT_R;
                     break;
                 case BSP_INPUT_SCANCODE_LEFTCTRL:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_CTRL_L;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_CTRL_L;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_CTRL_L;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_CTRL_L;
                     break;
                 case BSP_INPUT_SCANCODE_LEFTALT:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_ALT_L;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_ALT_L;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_ALT_L;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_ALT_L;
                     break;
                 case BSP_INPUT_SCANCODE_ESCAPED_RALT:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_ALT_R;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_ALT_R;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_ALT_R;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_ALT_R;
                     break;
                 case BSP_INPUT_SCANCODE_FN:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_FUNCTION;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_FUNCTION;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_FUNCTION;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_FUNCTION;
                     break;
                 case BSP_INPUT_SCANCODE_ESCAPED_LEFTMETA:
-                    if (pressed) modifiers |= BSP_INPUT_MODIFIER_SUPER_L;
-                    else modifiers &= ~BSP_INPUT_MODIFIER_SUPER_L;
+                    if (pressed)
+                        modifiers |= BSP_INPUT_MODIFIER_SUPER_L;
+                    else
+                        modifiers &= ~BSP_INPUT_MODIFIER_SUPER_L;
                     break;
                 default:
                     break;
@@ -320,12 +334,9 @@ esp_err_t bsp_input_initialize(void) {
                         "Failed to configure GPIO INT EN3");
 
     // Enable debounce on all pins
-    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS1, 0x00), TAG,
-                        "Failed to configure debounce 1");
-    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS2, 0x00), TAG,
-                        "Failed to configure debounce 2");
-    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS3, 0x00), TAG,
-                        "Failed to configure debounce 3");
+    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS1, 0x00), TAG, "Failed to configure debounce 1");
+    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS2, 0x00), TAG, "Failed to configure debounce 2");
+    ESP_RETURN_ON_ERROR(tca8418_write_register(TCA8418_REG_DEBOUNCE_DIS3, 0x00), TAG, "Failed to configure debounce 3");
 
     // Flush any pending events from the FIFO (up to 16 events max per TCA8418 FIFO depth)
     uint8_t discard = 0;
@@ -376,4 +387,3 @@ esp_err_t bsp_input_read_action(bsp_input_action_type_t action, bool* out_state)
     *out_state = false;
     return ESP_OK;
 }
-

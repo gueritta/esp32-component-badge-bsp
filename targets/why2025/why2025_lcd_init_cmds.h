@@ -5,25 +5,22 @@
 
 #if 0
 // Mountain
-#define ST7703_720_720_PANEL_60HZ_DPI_CONFIG()               \
-    {                                                        \
-        .dpi_clk_src        = MIPI_DSI_DPI_CLK_SRC_DEFAULT,  \
-        .dpi_clock_freq_mhz = 58,                            \
-        .virtual_channel    = 0,                             \
-        .pixel_format       = LCD_COLOR_PIXEL_FORMAT_RGB565, \
-        .num_fbs            = 1,                             \
-        .video_timing =                                      \
-            {                                                \
-                .h_size            = 720,                    \
-                .v_size            = 720,                    \
-                .hsync_back_porch  = 80,                     \
-                .hsync_pulse_width = 20,                     \
-                .hsync_front_porch = 80,                     \
-                .vsync_back_porch  = 12,                     \
-                .vsync_pulse_width = 4,                      \
-                .vsync_front_porch = 30,                     \
-            },                                               \
-        .flags.use_dma2d = true,                             \
+#define ST7703_720_720_PANEL_60HZ_DPI_CONFIG()                                                       \
+    {                                                                                                \
+        .dpi_clk_src = MIPI_DSI_DPI_CLK_SRC_DEFAULT, .dpi_clock_freq_mhz = 58, .virtual_channel = 0, \
+        .pixel_format = LCD_COLOR_PIXEL_FORMAT_RGB565, .num_fbs = 1,                                 \
+        .video_timing =                                                                              \
+            {                                                                                        \
+                .h_size            = 720,                                                            \
+                .v_size            = 720,                                                            \
+                .hsync_back_porch  = 80,                                                             \
+                .hsync_pulse_width = 20,                                                             \
+                .hsync_front_porch = 80,                                                             \
+                .vsync_back_porch  = 12,                                                             \
+                .vsync_pulse_width = 4,                                                              \
+                .vsync_front_porch = 30,                                                             \
+            },                                                                                       \
+        .flags.use_dma2d = true,                                                                     \
     }
 
 static const st7703_lcd_init_cmd_t custom_init[] =                                                                                             \
@@ -75,25 +72,22 @@ static const st7703_lcd_init_cmd_t custom_init[] =                              
 
 #else
 // Bono
-#define ST7703_720_720_PANEL_60HZ_DPI_CONFIG()               \
-    {                                                        \
-        .dpi_clk_src        = MIPI_DSI_DPI_CLK_SRC_DEFAULT,  \
-        .dpi_clock_freq_mhz = 47,                            \
-        .virtual_channel    = 0,                             \
-        .pixel_format       = LCD_COLOR_PIXEL_FORMAT_RGB565, \
-        .video_timing =                                      \
-            {                                                \
-                .h_size            = 720,                    \
-                .v_size            = 720,                    \
-                .hsync_back_porch  = 120,                    \
-                .hsync_pulse_width = 60,                     \
-                .hsync_front_porch = 106,                    \
-                .vsync_back_porch  = 20,                     \
-                .vsync_pulse_width = 4,                      \
-                .vsync_front_porch = 20,                     \
-            },                                               \
-        .flags.use_dma2d  = true,                            \
-        .flags.disable_lp = false,                           \
+#define ST7703_720_720_PANEL_60HZ_DPI_CONFIG()                                                       \
+    {                                                                                                \
+        .dpi_clk_src = MIPI_DSI_DPI_CLK_SRC_DEFAULT, .dpi_clock_freq_mhz = 47, .virtual_channel = 0, \
+        .pixel_format = LCD_COLOR_PIXEL_FORMAT_RGB565,                                               \
+        .video_timing =                                                                              \
+            {                                                                                        \
+                .h_size            = 720,                                                            \
+                .v_size            = 720,                                                            \
+                .hsync_back_porch  = 120,                                                            \
+                .hsync_pulse_width = 60,                                                             \
+                .hsync_front_porch = 106,                                                            \
+                .vsync_back_porch  = 20,                                                             \
+                .vsync_pulse_width = 4,                                                              \
+                .vsync_front_porch = 20,                                                             \
+            },                                                                                       \
+        .flags.use_dma2d = true, .flags.disable_lp = false,                                          \
     }
 
 static const st7703_lcd_init_cmd_t custom_init[] = {

@@ -20,3 +20,19 @@
 // TCA8418 keyboard scanner
 #define BSP_TCA8418_I2C_ADDRESS 0x34
 #define BSP_TCA8418_INT_PIN     GPIO_NUM_NC  // Interrupt pin not connected
+
+// SD card slot
+#define BSP_SDCARD_CLK   -1
+#define BSP_SDCARD_CMD   -1
+#define BSP_SDCARD_D0    -1
+#define BSP_SDCARD_D1    -1
+#define BSP_SDCARD_D2    -1
+#define BSP_SDCARD_D3    -1
+#define BSP_SDCARD_D4    -1
+#define BSP_SDCARD_D5    -1
+#define BSP_SDCARD_D6    -1
+#define BSP_SDCARD_D7    -1
+#define BSP_SDCARD_CD    -1
+#define BSP_SDCARD_WP    -1
+#define BSP_SDCARD_WIDTH 4
+#define BSP_SDCARD_FLAGS 0
