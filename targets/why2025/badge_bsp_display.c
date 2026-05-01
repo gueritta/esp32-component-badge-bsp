@@ -157,6 +157,5 @@ esp_err_t bsp_display_set_backlight_brightness(uint8_t percentage) {
 
 esp_err_t bsp_display_blit(size_t x_start, size_t y_start, size_t x_end, size_t y_end, const void* buffer) {
     xSemaphoreTake(flush_semaphore, pdMS_TO_TICKS(1000));
-    printf("UPDATE %zu %zu %zu %zu\n", x_start, y_start, x_end, y_end);
     return esp_lcd_panel_draw_bitmap(panel_handle, x_start, y_start, x_end, y_end, buffer);
 }
