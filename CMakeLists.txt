@@ -41,10 +41,15 @@ set(ESP32_BSP_REQUIREMENTS
 # BSP requirements only used on for ESP32-P4 targets
 
 set(ESP32P4_BSP_REQUIREMENTS
-    "nicolaielectronics__tanmatsu_coprocessor"
     "nicolaielectronics__mipi_dsi_abstraction"
-    "es8156"
 )
+
+if (CONFIG_BSP_TARGET_TANMATSU OR CONFIG_BSP_TARGET_KONSOOL)
+    list(APPEND ESP32P4_BSP_REQUIREMENTS
+        "nicolaielectronics__tanmatsu_coprocessor"
+        "es8156"
+    )
+endif()
 
 # -------------------------
 
